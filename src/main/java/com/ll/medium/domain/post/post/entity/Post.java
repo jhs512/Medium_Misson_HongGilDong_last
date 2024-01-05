@@ -4,7 +4,10 @@ import com.ll.medium.domain.member.member.entity.Member;
 import com.ll.medium.domain.post.postComment.entity.PostComment;
 import com.ll.medium.domain.post.postLike.entity.PostLike;
 import com.ll.medium.global.jpa.BaseEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -34,11 +37,8 @@ public class Post extends BaseEntity {
     private Member author;
     private String title;
 
-    @Column(columnDefinition = "TEXT")
-    private String body;
-
     @ManyToOne(fetch = LAZY)
-    private PostDetail postDetailBody;
+    private PostDetail detailBody;
 
     private boolean published;
     @Setter(PROTECTED)

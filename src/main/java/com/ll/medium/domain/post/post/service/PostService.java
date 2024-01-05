@@ -28,7 +28,6 @@ public class PostService {
         Post post = Post.builder()
                 .author(author)
                 .title(title)
-                .body(body)
                 .published(published)
                 .build();
 
@@ -91,28 +90,27 @@ public class PostService {
     }
 
     private void saveBody(Post post, String body) {
-        post.setBody(body);
-
-        PostDetail postDetailBody = findDetail(post, "common__body");
-        postDetailBody.setVal(body);
-        post.setPostDetailBody(postDetailBody);
+        PostDetail detailBody = findDetail(post, "common__body");
+        detailBody.setVal(body);
+        post.setDetailBody(detailBody);
     }
 
     private PostDetail findDetail(Post post, String name) {
-        Optional<PostDetail> opPostDetailBody = postDetailRepository.findByPostAndName(post, name);
+        Optional<PostDetail> opDetailBody = postDetailRepository.findByPostAndName(post, name);
 
-        PostDetail postDetailBody = opPostDetailBody.orElseGet(() -> postDetailRepository.save(
+        PostDetail detailBody = opDetailBody.orElseGet(() -> postDetailRepository.save(
                 PostDetail.builder()
                         .post(post)
                         .name(name)
                         .build()
         ));
 
-        return postDetailBody;
+        return detailBody;
     }
 
     @Transactional
     public void delete(Post post) {
+        postDetailRepository.deleteByPost(post);
         postRepository.delete(post);
     }
 
