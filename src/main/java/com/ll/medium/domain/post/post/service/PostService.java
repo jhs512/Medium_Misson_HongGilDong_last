@@ -2,6 +2,8 @@ package com.ll.medium.domain.post.post.service;
 
 import com.ll.medium.domain.member.member.entity.Member;
 import com.ll.medium.domain.post.post.entity.Post;
+import com.ll.medium.domain.post.post.entity.PostDetail;
+import com.ll.medium.domain.post.post.repository.PostDetailRepository;
 import com.ll.medium.domain.post.post.repository.PostRepository;
 import com.ll.medium.domain.post.postComment.entity.PostComment;
 import com.ll.medium.domain.post.postComment.repository.PostCommentRepository;
@@ -18,6 +20,7 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class PostService {
     private final PostRepository postRepository;
+    private final PostDetailRepository postDetailRepository;
     private final PostCommentRepository postCommentRepository;
 
     @Transactional
@@ -29,7 +32,11 @@ public class PostService {
                 .published(published)
                 .build();
 
-        return postRepository.save(post);
+        postRepository.save(post);
+
+        saveBody(post, body);
+
+        return post;
     }
 
     public Object findTop30ByPublishedOrderByIdDesc(boolean published) {
@@ -77,9 +84,31 @@ public class PostService {
     @Transactional
     public void edit(Post post, String title, String body, boolean published, int minMembershipLevel) {
         post.setTitle(title);
-        post.setBody(body);
         post.setPublished(published);
         post.setMinMembershipLevel(minMembershipLevel);
+
+        saveBody(post, body);
+    }
+
+    private void saveBody(Post post, String body) {
+        post.setBody(body);
+
+        PostDetail postDetailBody = findDetail(post, "common__body");
+
+        postDetailBody.setVal(body);
+    }
+
+    private PostDetail findDetail(Post post, String name) {
+        Optional<PostDetail> opPostDetailBody = postDetailRepository.findByPostAndName(post, name);
+
+        PostDetail postDetailBody = opPostDetailBody.orElseGet(() -> postDetailRepository.save(
+                PostDetail.builder()
+                        .post(post)
+                        .name(name)
+                        .build()
+        ));
+
+        return postDetailBody;
     }
 
     @Transactional
