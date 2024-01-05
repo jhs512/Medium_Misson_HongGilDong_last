@@ -1,12 +1,14 @@
 package com.ll.medium.domain.post.post.entity;
 
 import com.ll.medium.global.jpa.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.*;
 
 import static lombok.AccessLevel.PROTECTED;
 
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"post_id", "name"})
+})
 @Entity
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PROTECTED)
@@ -17,5 +19,6 @@ public class PostDetail extends BaseEntity {
     @ManyToOne
     private Post post;
     private String name;
+    @Column(columnDefinition = "TEXT")
     private String val;
 }
