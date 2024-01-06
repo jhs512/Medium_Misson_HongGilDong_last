@@ -1,5 +1,7 @@
 package com.ll.medium.domain.post.post.service;
 
+import com.ll.medium.domain.base.genFile.entity.GenFile;
+import com.ll.medium.domain.base.genFile.service.GenFileService;
 import com.ll.medium.domain.member.member.entity.Member;
 import com.ll.medium.domain.post.post.entity.Post;
 import com.ll.medium.domain.post.post.entity.PostDetail;
@@ -13,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -22,6 +25,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostDetailRepository postDetailRepository;
     private final PostCommentRepository postCommentRepository;
+    private final GenFileService genFileService;
 
     @Transactional
     public Post write(Member author, String title, String body, boolean published) {
@@ -137,8 +141,14 @@ public class PostService {
         return detailBody;
     }
 
+    private List<GenFile> findGenFiles(Post post) {
+        return genFileService.findByRelId(post.getModelName(), post.getId());
+    }
+
     @Transactional
     public void delete(Post post) {
+        findGenFiles(post).forEach(genFileService::remove);
+
         postDetailRepository.deleteByPost(post);
         postRepository.delete(post);
     }
