@@ -9,6 +9,8 @@ import com.ll.medium.domain.post.post.repository.PostDetailRepository;
 import com.ll.medium.domain.post.post.repository.PostRepository;
 import com.ll.medium.domain.post.postComment.entity.PostComment;
 import com.ll.medium.domain.post.postComment.repository.PostCommentRepository;
+import com.ll.medium.domain.post.postLike.entity.PostLike;
+import com.ll.medium.domain.post.postLike.repository.PostLikeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +26,7 @@ import java.util.Optional;
 public class PostService {
     private final PostRepository postRepository;
     private final PostDetailRepository postDetailRepository;
+    private final PostLikeRepository postLikeRepository;
     private final PostCommentRepository postCommentRepository;
     private final GenFileService genFileService;
 
@@ -48,7 +51,7 @@ public class PostService {
         return post;
     }
 
-    public Object findTop30ByPublishedOrderByIdDesc(boolean published) {
+    public List<Post> findTop30ByPublishedOrderByIdDesc(boolean published) {
         return postRepository.findTop30ByPublishedOrderByIdDesc(published);
     }
 
@@ -204,5 +207,9 @@ public class PostService {
     public Post findTempOrMake(Member author) {
         return postRepository.findByAuthorAndPublishedAndTitle(author, false, "임시글")
                 .orElseGet(() -> write(author, "임시글", "", false));
+    }
+
+    public List<PostLike> findLikesByPostInAndMember(List<Post> posts, Member member) {
+        return postLikeRepository.findByPostInAndMember(posts, member);
     }
 }
