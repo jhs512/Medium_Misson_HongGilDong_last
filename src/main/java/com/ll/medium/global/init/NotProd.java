@@ -4,6 +4,7 @@ import com.ll.medium.domain.member.member.entity.Member;
 import com.ll.medium.domain.member.member.service.MemberService;
 import com.ll.medium.domain.post.post.entity.Post;
 import com.ll.medium.domain.post.post.service.PostService;
+import com.ll.medium.global.TransactionCache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ public class NotProd {
     private NotProd self;
     private final MemberService memberService;
     private final PostService postService;
+    private final TransactionCache transactionCache;
 
     @Bean
     @Order(3)
@@ -35,6 +37,7 @@ public class NotProd {
             if (memberService.findByUsername("user1").isPresent()) return;
 
             self.work1();
+            self.work2();
         };
     }
 
@@ -73,5 +76,10 @@ public class NotProd {
             Member user = memberService.join("user" + ++lastUsernameNo, "1234", 1).getData();
             Post post = postService.write(user, "제목 " + ++lastPostId, "내용 " + lastPostId, true, 1);
         }
+    }
+
+    @Transactional
+    public void work2() {
+
     }
 }
