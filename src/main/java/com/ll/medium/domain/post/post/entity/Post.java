@@ -4,13 +4,17 @@ import com.ll.medium.domain.member.member.entity.Member;
 import com.ll.medium.domain.post.postComment.entity.PostComment;
 import com.ll.medium.domain.post.postLike.entity.PostLike;
 import com.ll.medium.global.jpa.BaseEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static jakarta.persistence.CascadeType.ALL;
+import static jakarta.persistence.FetchType.LAZY;
 import static lombok.AccessLevel.PROTECTED;
 
 @Entity
@@ -19,24 +23,44 @@ import static lombok.AccessLevel.PROTECTED;
 @Builder
 @Getter
 @Setter
+@ToString(callSuper = true)
 public class Post extends BaseEntity {
     @OneToMany(mappedBy = "post", cascade = ALL, orphanRemoval = true)
     @Builder.Default
+    @ToString.Exclude
     private List<PostLike> likes = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = ALL, orphanRemoval = true)
     @Builder.Default
     @OrderBy("id DESC")
+    @ToString.Exclude
     private List<PostComment> comments = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = LAZY)
     private Member author;
     private String title;
-    @Column(columnDefinition = "TEXT")
-    private String body;
-    private boolean isPublished;
+
+    @ManyToOne(fetch = LAZY)
+    @ToString.Exclude
+    private PostDetail detailBody;
+
+    private boolean published;
+
     @Setter(PROTECTED)
     private long hit;
+
+    @Setter(PROTECTED)
+    private long likesCount;
+
+    private int minMembershipLevel;
+
+    public void increaseLikesCount() {
+        likesCount++;
+    }
+
+    private void decreaseLikesCount() {
+        likesCount--;
+    }
 
     public void increaseHit() {
         hit++;
@@ -51,6 +75,8 @@ public class Post extends BaseEntity {
                 .post(this)
                 .member(member)
                 .build());
+
+        increaseLikesCount();
     }
 
     public boolean hasLike(Member member) {
@@ -59,7 +85,11 @@ public class Post extends BaseEntity {
     }
 
     public void deleteLike(Member member) {
-        likes.removeIf(postLike -> postLike.getMember().equals(member));
+        boolean removed = likes.removeIf(postLike -> postLike.getMember().equals(member));
+
+        if (removed) {
+            decreaseLikesCount();
+        }
     }
 
     public PostComment writeComment(Member actor, String body) {
@@ -72,5 +102,11 @@ public class Post extends BaseEntity {
         comments.add(postComment);
 
         return postComment;
+    }
+
+    public String getBodyForEditor() {
+        return getDetailBody()
+                .getVal()
+                .replaceAll("(?i)(</?)script", "$1t-script");
     }
 }
