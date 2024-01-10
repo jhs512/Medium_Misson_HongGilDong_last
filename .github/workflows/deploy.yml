@@ -73,4 +73,14 @@ jobs:
           username: ${{ secrets.SERVER_1_SSH_USERNAME }}
           password: ${{ secrets.SERVER_1_SSH_PASSWORD }}
           port: ${{ secrets.SERVER_1_SSH_PORT }}
-          script: whoami
+          script: |
+            docker pull ghcr.io/jhs512/last-medium:latest
+            docker stop last_medium_1
+            docker rm last_medium_1
+            docker run \
+                -p 8081:8080 \
+                -d \
+                -v /docker_projects/jenkins_1/volume/gen:/gen \
+                --name last_medium_1 \
+                ghcr.io/jhs512/last-medium:latest
+            docker image prune
