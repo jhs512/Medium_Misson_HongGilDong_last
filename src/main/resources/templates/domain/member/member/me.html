@@ -12,9 +12,17 @@
         내 정보
     </h1>
 
+
     <div>
-        <div>username</div>
-        <div th:text="${@rq.member.username}"></div>
+        <div>
+            <div>username</div>
+            <div th:text="${@rq.member.username}"></div>
+        </div>
+
+        <div>
+            <div>createDate</div>
+            <div th:text="${@rq.member.createDate}"></div>
+        </div>
     </div>
 
 </div>
